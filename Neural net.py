@@ -13,14 +13,14 @@ learning_rate = 0.01
 
 def forward(image):
     global conv_filters, layer_weights, layer_biases
-    out_height = image_size - filter_size + 1
-    out_width = image_size - filter_size + 1
+    output_height = image_size - filter_size + 1
+    output_width = image_size - filter_size + 1
 
-    conv_output = np.zeros((num_filters, out_height, out_width))
+    conv_output = np.zeros((num_filters, output_height, output_width))
 
     for f in range(num_filters):
-        for i in range(out_height):
-            for j in range(out_width):
+        for i in range(output_height):
+            for j in range(output_width):
                 image_area = image[i:i + filter_size, j:j + filter_size]
 
                 conv_output[f, i, j] = np.sum(image_area * conv_filters[f])
@@ -29,23 +29,23 @@ def forward(image):
 
     output_flat = relu_output.flatten()
 
-    layer_output = np.dot(layer_weights, output_flat) + layer_biases
+    logits = np.dot(layer_weights, output_flat) + layer_biases
 
-    exp_layer_2 = np.exp(layer_output - np.max(layer_output))
-    probs = exp_layer_2 / np.sum(exp_layer_2)
+    exp_layer = np.exp(logits - np.max(logits))
+    probs = exp_layer / np.sum(exp_layer)
 
-    return conv_output, relu_output, output_flat, layer_output, probs
+    return conv_output, relu_output, output_flat, logits, probs
 
 def backward(image, label, conv_output, relu_output, output_flat, probs):
     global conv_filters, layer_weights, layer_biases, learning_rate, filters
 
-    d_layer = probs.copy()
-    d_layer[label] -= 1
+    d_logits = probs.copy()
+    d_logits[label] -= 1
 
-    d_layer_weights = np.outer(d_layer, output_flat)
-    d_layer_bias = d_layer
+    d_layer_weights = np.outer(d_logits, output_flat)
+    d_layer_bias = d_logits
 
-    d_flattened = np.dot(layer_weights.T, d_layer)
+    d_flattened = np.dot(layer_weights.T, d_logits)
     d_relu_output = d_flattened.reshape(relu_output.shape)
 
     d_conv_output = d_relu_output * (conv_output > 0)
@@ -81,7 +81,7 @@ def train(images, labels, epochs):
             image = images[i]
             label = labels[i]
 
-            conv_output, relu_output, flat, layer, probs = forward(image)
+            conv_output, relu_output, flat, logits, probs = forward(image)
 
             loss = backward(image, label, conv_output, relu_output, flat, probs)
             total_loss += loss
