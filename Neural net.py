@@ -127,7 +127,6 @@ model = NeuralNetwork()
 if __name__ == '__main__':
     start_time = time.time()
     #model.train(image_train[:10000], label_train[:10000], 3)
-    #conv_filters, layer_weights, layer_biases = load_model()
     model.accuracy(image_test[0], label_test[0])
 
     end_time = time.time()
