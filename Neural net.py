@@ -87,8 +87,6 @@ class NeuralNetwork:
         self.layer_weights = data['layer_weights']
         self.layer_biases = data['layer_biases']
 
-        #return conv_filters, layer_weights, layer_biases
-
     def predict(self, image):
         _, _, _, _, probs = self.forward(image)
         return np.argmax(probs)
@@ -127,7 +125,8 @@ model = NeuralNetwork()
 if __name__ == '__main__':
     start_time = time.time()
     #model.train(image_train[:10000], label_train[:10000], 3)
-    model.accuracy(image_test[0], label_test[0])
+
+    model.accuracy(image_test[:1000], label_test[:1000])
 
     end_time = time.time()
     print(f'Runtime: {end_time - start_time :.4f}')
